@@ -210,4 +210,4 @@ try:
   uxcore.display_success(['Successfully converted file', 'outputted to {}'.format(output_path)])
 except:
   log_path = uxcore.write_log('conv', files=[argv[1]])
-  uxcore.display_error(['Failed to convert file', 'error data written to {}'.format(log_path)])
+  uxcore.display_error(['ERROR: Failed to convert file, error data written:', '       {}'.format(log_path)])
