@@ -37,7 +37,7 @@ def produce_log(source=None, exception=True, files=None):
 
 def write_log(source=None, exception=True, files=None, log_prefix='errlog'):
   data = produce_log(source, exception, files)
-  ts = data['time'].replace('-','').replace('T','').replace(':','')
+  ts = data['time'].replace(':','-')
   path = '{prefix}_{timestamp}.json'.format(**{'prefix':log_prefix,'timestamp':ts})
   with open(path, 'w') as fp:
     json.dump(data, fp)
