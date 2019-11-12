@@ -9,6 +9,7 @@ import os
 from codec import proc_line
 from clocky import time_12
 from tryload import tryload
+import uxcore
 
 def unduplicate(day):
   i = 1
@@ -43,15 +44,15 @@ def check_titlecase(s, seps, whitelist):
 try:
   ### configuration
 
-  fp = open('data\config.json')
+  fp = open('data\\config.json')
   config = tryload(fp)
   fp.close()
 
-  fp = open('data\learned.json')
+  fp = open('data\\learned.json')
   learned = tryload(fp, object_pairs_hook = OrderedDict)
   fp.close()
 
-  fp = open('data\language.json')
+  fp = open('data\\language.json')
   language = tryload(fp)
   fp.close()
 
@@ -180,7 +181,7 @@ try:
 
   ### record learned behavior
 
-  fp = open('data\learned.json', 'w')
+  fp = open('data\\learned.json', 'w')
   dump(learned, fp, sort_keys=True, indent=2, separators=(',', ': '))
   fp.close()
 
@@ -202,15 +203,11 @@ try:
       event['begin'] = time_12(event['begin'], time_mode)
       event['end'] = time_12(event['end'], time_mode)
 
-  fp = open('%s.json' % firstday, 'w')
+  output_path = '{}.json'.format(firstday)
+  fp = open(output_path, 'w')
   dump(week, fp, sort_keys=True, indent=2, separators=(',', ': '))
   fp.close()
+  uxcore.display_success(['Successfully converted file', 'outputted to {}'.format(output_path)])
 except:
-  import traceback, sys
-  exc_type, exc_value, exc_traceback = sys.exc_info()
-  fp = open('converr.log', 'w')
-  exc = traceback.format_exception(exc_type, exc_value, exc_traceback)
-  fp.write('\n'.join(exc))
-  fp.close()
-  print('exception written to converr.log')
-  raw_input('press any key to exit')
+  log_path = uxcore.write_log('conv', files=[argv[1]])
+  uxcore.display_error(['Failed to convert file', 'error data written to {}'.format(log_path)])
