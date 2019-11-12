@@ -41,6 +41,7 @@ def write_log(source=None, exception=True, files=None, log_prefix='errlog'):
   path = '{prefix}_{timestamp}.json'.format(**{'prefix':log_prefix,'timestamp':ts})
   with open(path, 'w') as fp:
     json.dump(data, fp)
+  return path
 
 
 #################################
