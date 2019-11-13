@@ -1,1 +1,0 @@
-start npp\notepad++.exe %1
