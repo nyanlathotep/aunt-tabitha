@@ -69,9 +69,9 @@ def display_message(message, border, message_prefix, inner_padding, outer_paddin
   if (hard_acknowledge):
     i = ''
     while (i != 'confirm'):
-      i = raw_input('type "confirm" to exit> ').strip().lower()
+      i = raw_input('type "confirm" to exit > ').strip().lower()
   else:
-    raw_input('')
+    raw_input('press enter to exit > ')
 
 def display_success(message):
   display_message(message, *success_params)
