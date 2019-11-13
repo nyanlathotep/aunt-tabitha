@@ -1,2 +1,7 @@
 # python
 *.py[cdo]
+/py27
+
+# data
+*.json
+*.csv
