@@ -34,7 +34,7 @@ nouns = [
   'trousers', 'umbrella', 'wall', 'watch', 'wheel', 'whip', 'whistle', 'window',
   'wing', 'wire', 'worm']
 
-def nouns_signature(n=3):
+def nouns_signature(seed, n=3):
   return '_'.join(random.choice(nouns) for _ in range(n))
 
 def timestamp():
@@ -73,8 +73,9 @@ def fix_timestamp(ts, compact=False):
 def write_log(source=None, exception=True, files=None, log_prefix='log'):
   data = produce_log(source, exception, files)
   ts = fix_timestamp(data['time'], compact=True)
+  signature = nouns_signature(fix_timestamp(data['time'], compact=True))
   path = '{prefix}_{timestamp}_{signature}.json'.format(
-    **{'prefix':log_prefix,'timestamp':ts,'signature':nouns_signature()})
+    **{'prefix':log_prefix,'timestamp':ts,'signature':signature})
   with open(path, 'w') as fp:
     json.dump(data, fp)
   return path
