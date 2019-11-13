@@ -1,23 +1,18 @@
 #!/usr/local/bin/python
 from sys import argv
 from json import dump
-from collections import OrderedDict
-from tryload import tryload
 from clocky import time_12, time_24
 import uxcore
+from config import ConfigManager
+import nicejson
 
 try:
   ### configuration
-
-  fp = open('data\\config.json')
-  config = tryload(fp)
-  fp.close()
+  config = ConfigManager(
+    core='data\\config.json')
 
   ### input
-
-  fp = open(argv[1], mode = 'r')
-  week = tryload(fp, object_pairs_hook = OrderedDict)
-  fp.close()
+  week = nicejson.load(argv[1])
 
   ### convert times to 24 hour
 
@@ -56,16 +51,14 @@ try:
 
   ### output
 
-  time_mode = config['time_mode']
+  time_mode = config.core['time_mode']
 
   for day in week:
     for event in week[day]['classes']:
       event['begin'] = time_12(event['begin'], time_mode)
       event['end'] = time_12(event['end'], time_mode)
 
-  fp = open(argv[1], mode = 'w')
-  dump(week, fp, indent=2, separators=(',', ': '))
-  fp.close()
+  nicejson.dump(week, argv[1])
   uxcore.display_success(['SUCCESS: converted file, outputted:', '         {}'.format(argv[1])])
 except:
   log_path = uxcore.write_log('conv', files=[argv[1]])
