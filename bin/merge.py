@@ -35,5 +35,5 @@ try:
   nicejson.dump(data, output_path)
   uxcore.display_success_standard(output_path)
 except:
-  log_path = uxcore.write_log('merge', files=[argv[1]])
+  log_path = uxcore.write_log('merge', files=files)
   uxcore.display_error_standard(log_path)
