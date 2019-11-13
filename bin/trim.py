@@ -61,5 +61,5 @@ try:
   nicejson.dump(week, argv[1])
   uxcore.display_success(['SUCCESS: converted file, outputted:', '         {}'.format(argv[1])])
 except:
-  log_path = uxcore.write_log('conv', files=[argv[1]])
+  log_path = uxcore.write_log('trim', files=[argv[1]])
   uxcore.display_error(['ERROR: Failed to convert file, error data written:', '       {}'.format(log_path)])

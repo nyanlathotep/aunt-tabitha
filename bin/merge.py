@@ -35,5 +35,5 @@ try:
   nicejson.dump(data, output_path)
   uxcore.display_success(['SUCCESS: converted file, outputted:', '         {}'.format(output_path)])
 except:
-  log_path = uxcore.write_log('conv', files=[argv[1]])
+  log_path = uxcore.write_log('merge', files=[argv[1]])
   uxcore.display_error(['ERROR: Failed to convert file, error data written:', '       {}'.format(log_path)])
