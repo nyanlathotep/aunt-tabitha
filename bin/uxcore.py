@@ -2,10 +2,40 @@ import traceback
 import base64, zlib, json
 import hashlib
 import datetime
+import random
 
 ###############
 # error logging
 ###############
+
+nouns = [
+  'angle', 'ant', 'apple', 'arch', 'arm', 'army', 'baby', 'bag', 'ball',
+  'band', 'basin', 'basket', 'bath', 'bed', 'bee', 'bell', 'berry', 'bird',
+  'blade', 'board', 'boat', 'bone', 'book', 'boot', 'bottle', 'box', 'boy',
+  'brain', 'brake', 'branch', 'brick', 'bridge', 'brush', 'bucket', 'bulb',
+  'button', 'cake', 'camera', 'card', 'cart', 'carriage', 'cat', 'chain',
+  'cheese', 'chest', 'chin', 'church', 'circle', 'clock', 'cloud', 'coat',
+  'collar', 'comb', 'cord', 'cow', 'cup', 'curtain', 'cushion', 'dog', 'door',
+  'drain', 'drawer', 'dress', 'drop', 'ear', 'egg', 'engine', 'eye', 'face',
+  'farm', 'feather', 'finger', 'fish', 'flag', 'floor', 'fly', 'foot', 'fork',
+  'fowl', 'frame', 'garden', 'girl', 'glove', 'goat', 'gun', 'hair', 'hammer',
+  'hand', 'hat', 'head', 'heart', 'hook', 'horn', 'horse', 'hospital', 'house',
+  'island', 'jewel', 'kettle', 'key', 'knee', 'knife', 'knot', 'leaf', 'leg',
+  'library', 'line', 'lip', 'lock', 'map', 'match', 'monkey', 'moon', 'mouth',
+  'muscle', 'nail', 'neck', 'needle', 'nerve', 'net', 'nose', 'nut', 'office',
+  'orange', 'oven', 'parcel', 'pen', 'pencil', 'picture', 'pig', 'pin', 'pipe',
+  'plane', 'plate', 'plough', 'pocket', 'pot', 'potato', 'prison', 'pump',
+  'rail', 'rat', 'receipt', 'ring', 'rod', 'roof', 'root', 'sail', 'school',
+  'scissors', 'screw', 'seed', 'sheep', 'shelf', 'ship', 'shirt', 'shoe',
+  'skin', 'skirt', 'snake', 'sock', 'spade', 'sponge', 'spoon', 'spring',
+  'square', 'stamp', 'star', 'station', 'stem', 'stick', 'stocking', 'stomach',
+  'store', 'street', 'sun', 'table', 'tail', 'thread', 'throat', 'thumb',
+  'ticket', 'toe', 'tongue', 'tooth', 'town', 'train', 'tray', 'tree',
+  'trousers', 'umbrella', 'wall', 'watch', 'wheel', 'whip', 'whistle', 'window',
+  'wing', 'wire', 'worm']
+
+def nouns_signature(n=3):
+  return '_'.join(random.choice(nouns) for _ in range(n))
 
 def timestamp():
   dt = datetime.datetime.now()
@@ -35,10 +65,16 @@ def produce_log(source=None, exception=True, files=None):
       data['files'].append(bundle_file(path))
   return data
 
-def write_log(source=None, exception=True, files=None, log_prefix='errlog'):
+def fix_timestamp(ts, compact=False):
+  if (compact):
+    return ts.replace(':','').replace('T','').replace('-','')
+  return ts.replace(':','-')
+
+def write_log(source=None, exception=True, files=None, log_prefix='log'):
   data = produce_log(source, exception, files)
-  ts = data['time'].replace(':','-')
-  path = '{prefix}_{timestamp}.json'.format(**{'prefix':log_prefix,'timestamp':ts})
+  ts = fix_timestamp(data['time'], compact=True)
+  path = '{prefix}_{timestamp}_{signature}.json'.format(
+    **{'prefix':log_prefix,'timestamp':ts,'signature':nouns_signature()})
   with open(path, 'w') as fp:
     json.dump(data, fp)
   return path
