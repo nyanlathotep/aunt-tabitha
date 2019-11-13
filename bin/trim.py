@@ -1,6 +1,7 @@
 #!/usr/local/bin/python
 from sys import argv
 from json import dump
+import os.path
 from clocky import time_12, time_24
 import uxcore
 from config import ConfigManager
@@ -59,7 +60,8 @@ try:
       event['end'] = time_12(event['end'], time_mode)
 
   nicejson.dump(week, argv[1])
-  uxcore.display_success(['SUCCESS: converted file, outputted:', '         {}'.format(argv[1])])
+  output_path = os.path.split(argv[1])[-1]
+  uxcore.display_success_standard(output_path)
 except:
   log_path = uxcore.write_log('trim', files=[argv[1]])
-  uxcore.display_error(['ERROR: Failed to convert file, error data written:', '       {}'.format(log_path)])
+  uxcore.display_error_standard(log_path)

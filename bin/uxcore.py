@@ -78,3 +78,9 @@ def display_success(message):
 
 def display_error(message):
   display_message(message, *error_params, hard_acknowledge=True)
+
+def display_success_standard(output_path):
+  display_success(['SUCCESS: converted file, outputted:', '         {}'.format(output_path)])
+
+def display_error_standard(log_path):
+  display_error(['ERROR: Failed to convert file', '       error data and input files written to:', '       {}'.format(log_path)])
