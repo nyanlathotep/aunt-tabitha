@@ -3,6 +3,7 @@ import base64, zlib, json
 import hashlib
 import datetime
 import random
+from collections import OrderedDict
 
 ###############
 # error logging
@@ -53,12 +54,14 @@ def bundle_file(path):
     data['exception'] = traceback.format_exc()
   return data
 
-def produce_log(source=None, exception=True, files=None):
-  data = {'time': timestamp()}
+def produce_log(source=None, exception=True, files=None, context=None):
+  data = OrderedDict({'time': timestamp()})
   if (source):
     data['source'] = source
   if (exception):
     data['exception'] = traceback.format_exc()
+  if (context):
+    data['context'] = context
   if (files):
     data['files'] = []
     for path in files:
@@ -70,8 +73,8 @@ def fix_timestamp(ts, compact=False):
     return ts.replace(':','').replace('T','').replace('-','')
   return ts.replace(':','-')
 
-def write_log(source=None, exception=True, files=None, log_prefix='log'):
-  data = produce_log(source, exception, files)
+def write_log(source=None, exception=True, files=None, log_prefix='log', context= None):
+  data = produce_log(source, exception, files, context)
   ts = fix_timestamp(data['time'], compact=True)
   signature = nouns_signature(fix_timestamp(data['time'], compact=True))
   path = '{prefix}_{timestamp}_{signature}.json'.format(

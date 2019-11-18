@@ -1,5 +1,11 @@
 from clocky import time_24
 
+def check_line(line):
+  # check time exists
+  if (line[2].strip() == '' or line[3].strip() == ''):
+    return False
+  return True
+
 def proc_line(line):
   line = line[2:]
   line[1] = line[1][2:]

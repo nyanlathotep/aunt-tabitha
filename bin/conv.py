@@ -5,11 +5,12 @@ import re
 from collections import OrderedDict
 import os
 
-from codec import proc_line
+from codec import proc_line, check_line
 from clocky import time_12
 import uxcore
 from config import ConfigManager
 import nicejson
+import copy
 
 def unduplicate(day):
   i = 1
@@ -59,13 +60,16 @@ try:
 
   days = []
   for line in week:
+    debug_last_line = copy.copy(line)
     if line[1] != '':
       days += [[line[1], []]]
       line[1] = ''
       if (len([x for x in line if x])):
-        days[-1][1] += [proc_line(line)]
+        if (check_line(line)):
+          days[-1][1] += [proc_line(line)]
     elif days is not None and len(days) > 0:
-      days[-1][1] += [proc_line(line)]
+      if (check_line(line)):
+        days[-1][1] += [proc_line(line)]
 
   ### blacklists and unduplication
 
@@ -191,5 +195,5 @@ try:
   nicejson.dump(week, output_path)
   uxcore.display_success_standard(output_path)
 except:
-  log_path = uxcore.write_log('conv', files=[argv[1]])
+  log_path = uxcore.write_log('conv', files=[argv[1]], context={'last_line':debug_last_line})
   uxcore.display_error_standard(log_path)
