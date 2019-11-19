@@ -1,4 +1,4 @@
-# {"id": "codec", "version": "bin_meta_alpha"}
+# {"version": "1"}
 
 from clocky import time_24
 

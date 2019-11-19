@@ -1,4 +1,4 @@
-# {"id": "trim", "version": "bin_meta_alpha"}
+# {"version": "1"}
 
 from sys import argv
 from json import dump

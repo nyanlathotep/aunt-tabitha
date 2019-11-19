@@ -1,4 +1,4 @@
-# {"id": "clocky", "version": "bin_meta_alpha"}
+# {"version": "1"}
 
 def time_24(time):
   time = time.lower()

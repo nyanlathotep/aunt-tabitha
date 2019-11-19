@@ -1,4 +1,4 @@
-# {"id": "conv", "version": "bin_meta_alpha"}
+# {"version": "1"}
 
 from sys import argv
 from csv import reader

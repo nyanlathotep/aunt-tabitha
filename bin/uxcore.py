@@ -1,4 +1,4 @@
-# {"id": "uxcore", "version": "bin_meta_alpha"}
+# {"version": "1"}
 
 import traceback
 import base64, zlib, json
