@@ -1,9 +1,12 @@
+# {"id": "uxcore", "version": "bin_meta_alpha"}
+
 import traceback
 import base64, zlib, json
 import hashlib
 import datetime
 import random
 from collections import OrderedDict
+import os.path, glob, re
 
 ###############
 # error logging
@@ -54,7 +57,29 @@ def bundle_file(path):
     data['exception'] = traceback.format_exc()
   return data
 
-def produce_log(source=None, exception=True, files=None, context=None):
+def get_bin_dir(arg0):
+  return os.path.split(arg0)[0]
+
+bin_meta_re = re.compile(r'\s*#\s*({.*})\s*')
+
+def collect_bin_info(bin_dir):
+  data = {}
+  for path in glob.iglob(os.path.join(bin_dir,'*.py')):
+    path_data = {'full_path': path}
+    with open(path, 'rb') as fp:
+      first_line = fp.readline()
+      content = fp.read()
+    file_hash = hashlib.sha256(first_line)
+    file_hash.update(content)
+    path_data['integrity'] = file_hash.hexdigest()
+    match = bin_meta_re.match(first_line)
+    if (match):
+      path_data['meta'] = json.loads(match.group(1), object_pairs_hook = OrderedDict)
+    file_name = os.path.split(path)[1]
+    data[file_name] = path_data
+  return data
+
+def produce_log(source=None, exception=True, files=None, context=None, first_arg=None):
   data = OrderedDict({'time': timestamp()})
   if (source):
     data['source'] = source
@@ -62,6 +87,9 @@ def produce_log(source=None, exception=True, files=None, context=None):
     data['exception'] = traceback.format_exc()
   if (context):
     data['context'] = context
+  if (first_arg):
+    bin_dir = get_bin_dir(first_arg)
+    data['bin_meta'] = collect_bin_info(bin_dir)
   if (files):
     data['files'] = []
     for path in files:
@@ -73,8 +101,8 @@ def fix_timestamp(ts, compact=False):
     return ts.replace(':','').replace('T','').replace('-','')
   return ts.replace(':','-')
 
-def write_log(source=None, exception=True, files=None, log_prefix='log', context= None):
-  data = produce_log(source, exception, files, context)
+def write_log(source=None, exception=True, files=None, log_prefix='log', context= None, first_arg=None):
+  data = produce_log(source, exception, files, context, first_arg)
   ts = fix_timestamp(data['time'], compact=True)
   signature = nouns_signature(fix_timestamp(data['time'], compact=True))
   path = '{prefix}_{timestamp}_{signature}.json'.format(

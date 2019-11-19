@@ -1,4 +1,5 @@
-#!/usr/local/bin/python
+# {"id": "conv", "version": "bin_meta_alpha"}
+
 from sys import argv
 from csv import reader
 import re
@@ -195,5 +196,5 @@ try:
   nicejson.dump(week, output_path)
   uxcore.display_success_standard(output_path)
 except:
-  log_path = uxcore.write_log('conv', files=[argv[1]], context={'last_line':debug_last_line})
+  log_path = uxcore.write_log('conv', files=[argv[1]], context={'last_line':debug_last_line}, first_arg=argv[0])
   uxcore.display_error_standard(log_path)

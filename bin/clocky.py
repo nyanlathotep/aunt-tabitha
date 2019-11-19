@@ -1,3 +1,5 @@
+# {"id": "clocky", "version": "bin_meta_alpha"}
+
 def time_24(time):
   time = time.lower()
   time = time.replace(' ','')

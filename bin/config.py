@@ -1,3 +1,5 @@
+# {"id": "config", "version": "bin_meta_alpha"}
+
 import copy, nicejson
 
 def default_core():

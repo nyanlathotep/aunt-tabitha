@@ -1,3 +1,5 @@
+# {"id": "codec", "version": "bin_meta_alpha"}
+
 from clocky import time_24
 
 def check_line(line):

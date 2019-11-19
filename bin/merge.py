@@ -1,4 +1,5 @@
-#!/usr/local/bin/python
+# {"id": "merge", "version": "bin_meta_alpha"}
+
 from sys import argv
 from clocky import time_24
 import uxcore
@@ -35,5 +36,5 @@ try:
   nicejson.dump(data, output_path)
   uxcore.display_success_standard(output_path)
 except:
-  log_path = uxcore.write_log('merge', files=files)
+  log_path = uxcore.write_log('merge', files=files, first_arg=argv[0])
   uxcore.display_error_standard(log_path)

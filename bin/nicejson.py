@@ -1,3 +1,5 @@
+# {"id": "nicejson", "version": "bin_meta_alpha"}
+
 import json
 from collections import OrderedDict
 
