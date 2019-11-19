@@ -8,6 +8,33 @@ import random
 from collections import OrderedDict
 import os.path, glob, re
 
+#################
+# logging context
+#################
+
+class Singleton(object):
+  def __new__(cls, *args, **kwds):
+    it = cls.__dict__.get("__it__")
+    if it is not None:
+      return it
+    cls.__it__ = it = object.__new__(cls)
+    it.init(*args, **kwds)
+    return it
+  def init(self, *args, **kwds):
+    pass
+
+class Context(Singleton):
+  def init(self):
+    self.data = {}
+  def __contains__(self, key):
+    return key in self.data
+  def __getitem__(self, key):
+    return self.data[key]
+  def __setitem__(self, key, value):
+    self.data[key] = value
+  def __iter__(self):
+    return self.data.iterkeys()
+
 ###############
 # error logging
 ###############
@@ -79,14 +106,14 @@ def collect_bin_info(bin_dir):
     data[file_name] = path_data
   return data
 
-def produce_log(source=None, exception=True, files=None, context=None, first_arg=None):
+def produce_log(source=None, exception=True, files=None, first_arg=None):
   data = OrderedDict({'time': timestamp()})
   if (source):
     data['source'] = source
   if (exception):
     data['exception'] = traceback.format_exc()
-  if (context):
-    data['context'] = context
+  context = Context()
+  data['context'] = context.data
   if (first_arg):
     bin_dir = get_bin_dir(first_arg)
     data['bin_meta'] = collect_bin_info(bin_dir)
@@ -101,8 +128,8 @@ def fix_timestamp(ts, compact=False):
     return ts.replace(':','').replace('T','').replace('-','')
   return ts.replace(':','-')
 
-def write_log(source=None, exception=True, files=None, log_prefix='log', context= None, first_arg=None):
-  data = produce_log(source, exception, files, context, first_arg)
+def write_log(source=None, exception=True, files=None, log_prefix='log', first_arg=None):
+  data = produce_log(source, exception, files, first_arg)
   ts = fix_timestamp(data['time'], compact=True)
   signature = nouns_signature(fix_timestamp(data['time'], compact=True))
   path = '{prefix}_{timestamp}_{signature}.json'.format(

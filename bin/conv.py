@@ -50,6 +50,10 @@ try:
     learned='data\\learned.json',
     language='data\\language.json')
 
+  context = uxcore.Context()
+  context['conv'] = {}
+  context = context['conv']
+
   ### CSV reading
 
   fp = open(argv[1])
@@ -61,7 +65,7 @@ try:
 
   days = []
   for line in week:
-    debug_last_line = copy.copy(line)
+    context['last_line'] = copy.copy(line)
     if line[1] != '':
       days += [[line[1], []]]
       line[1] = ''
@@ -196,5 +200,5 @@ try:
   nicejson.dump(week, output_path)
   uxcore.display_success_standard(output_path)
 except:
-  log_path = uxcore.write_log('conv', files=[argv[1]], context={'last_line':debug_last_line}, first_arg=argv[0])
+  log_path = uxcore.write_log('conv', files=[argv[1]], first_arg=argv[0])
   uxcore.display_error_standard(log_path)
