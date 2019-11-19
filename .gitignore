@@ -5,3 +5,6 @@
 # data
 *.json
 *.csv
+*.yaml
+*.txt
+*.log
