@@ -36,9 +36,17 @@ class NegativeEntry(PatchEntry):
   def execute(self):
     self.patch.remove_entry(self)
 
+class CollectEntry(PatchEntry):
+  def __init__(self, patch, data):
+    PatchEntry.__init__(self, patch, data['path'])
+    self.pattern = data['pattern'] if 'pattern' in data else False
+  def execute(self):
+    self.patch.collect_entry(self)
+
 entry_handlers = {
   'extract': BundledFile,
-  'remove': NegativeEntry
+  'remove': NegativeEntry,
+  'collect': CollectEntry
 }
 
 def render_version(version):
@@ -116,10 +124,22 @@ class Summary:
   def render_short(self):
     return self.format_string.format(len(self.additions), len(self.changes), len(self.deletions))
 
+class FileCollection:
+  def __init__(self):
+    self.signatures = set()
+    self.paths = []
+  def add(self, path):
+    relpath = os.path.relpath(path)
+    if (relpath not in self.signatures):
+      self.signatures.add(relpath)
+      self.paths.append(path)
+
 class Patch:
   def __init__(self, data):
     self.summary = Summary()
+    self.properties = data['properties'] if 'properties' in data else {}
     self.entries = []
+    self.collection = FileCollection()
     for item in data['entries']:
       self.entries.append(entry_handlers[item['action']](self, item))
   def add_addition(self, *params):
@@ -150,7 +170,7 @@ class Patch:
       for path in glob.iglob(filespec.path):
         self.remove_file(path)
     else:
-      self.remove_file(path)
+      self.remove_file(filespec.path)
   def remove_file(self, path):
     try:
       if (os.path.exists(path)):
@@ -158,9 +178,20 @@ class Patch:
         self.add_deletion(path)
     except:
       pass
+  def collect_entry(self, filespec):
+    if (filespec.pattern):
+      for path in glob.iglob(filespec.path):
+        self.collect_path(path)
+    else:
+        self.collect_path(filespec.path)
+  def collect_path(self, path):
+    self.collection.add(path)
   def execute(self):
     for item in self.entries:
       item.execute()
+    log_data = maintlib.produce_log('update:collect', self.collection.paths, exception=False)
+    outfile = self.properties['remote_output'] if 'remote_output' in self.properties else 'update_collect.json'
+    nicejson.dump(log_data, outfile)
 
 if (__name__ == '__main__'):
   def abort():
