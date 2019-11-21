@@ -1,4 +1,4 @@
-# {"version": "1"}
+# {"version": "2"}
 
 import traceback
 import base64, zlib, json
@@ -7,6 +7,13 @@ import datetime
 import random
 from collections import OrderedDict
 import os.path, glob, re
+
+import filelib
+
+try:
+  user_input = raw_input
+except NameError:
+  user_input = input
 
 #################
 # logging context
@@ -87,24 +94,8 @@ def bundle_file(path):
 def get_bin_dir(arg0):
   return os.path.split(arg0)[0]
 
-bin_meta_re = re.compile(r'\s*#\s*({.*})\s*')
-
 def collect_bin_info(bin_dir):
-  data = {}
-  for path in glob.iglob(os.path.join(bin_dir,'*.py')):
-    path_data = {'full_path': path}
-    with open(path, 'rb') as fp:
-      first_line = fp.readline()
-      content = fp.read()
-    file_hash = hashlib.sha256(first_line)
-    file_hash.update(content)
-    path_data['integrity'] = file_hash.hexdigest()
-    match = bin_meta_re.match(first_line)
-    if (match):
-      path_data['meta'] = json.loads(match.group(1), object_pairs_hook = OrderedDict)
-    file_name = os.path.split(path)[1]
-    data[file_name] = path_data
-  return data
+  return filelib.collect_file_info(bin_dir, '*.py', bin_dir)
 
 def produce_log(source=None, exception=True, files=None, first_arg=None):
   data = OrderedDict({'time': timestamp()})
@@ -164,9 +155,9 @@ def display_message(message, border, message_prefix, inner_padding, outer_paddin
   if (hard_acknowledge):
     i = ''
     while (i != 'confirm'):
-      i = raw_input('type "confirm" to exit > ').strip().lower()
+      i = user_input('type "confirm" to exit > ').strip().lower()
   else:
-    raw_input('press enter to exit > ')
+    user_input('press enter to exit > ')
 
 def display_success(message):
   display_message(message, *success_params)

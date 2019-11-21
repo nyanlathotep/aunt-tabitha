@@ -1,35 +1,8 @@
-# {"version": "bootstrap"}
+# {"version": "2"}
 
-import json, re, os, glob, sys, zlib, base64, hashlib
+import re, os, glob, sys, zlib, base64, hashlib
 
-def get_bin_dir(arg0):
-  return os.path.split(arg0)[0]
-
-bin_meta_re = re.compile(r'\s*#\s*({.*})\s*')
-
-def get_meta(first_line):
-  match = bin_meta_re.match(first_line)
-  if (match):
-    try:
-      meta = json.loads(match.group(1))
-    except ValueError:
-      meta = None
-  else:
-    meta = None
-  return meta
-
-def get_file_info(path):
-  data = {'full_path': path}
-  with open(path, 'rb') as fp:
-    first_line = fp.readline()
-    content = fp.read()
-  file_hash = hashlib.sha256(first_line)
-  file_hash.update(content)
-  data['integrity'] = file_hash.hexdigest()
-  meta = get_meta(first_line)
-  if (meta):
-    data['meta'] = meta
-  return data
+import filelib, uxcore, nicejson
 
 class PatchEntry:
   def __init__(self, patch, path):
@@ -50,8 +23,8 @@ class BundledFile(PatchEntry):
     self.detect_version()
   def detect_version(self):
     first_line = self.content.partition('\n')[0]
-    meta = get_meta(first_line)
-    if ('version') in meta:
+    meta = filelib.get_meta(first_line)
+    if meta and ('version') in meta:
       self.version = meta['version']
   def execute(self):
     self.patch.extract_file(self)
@@ -59,8 +32,9 @@ class BundledFile(PatchEntry):
 class NegativeEntry(PatchEntry):
   def __init__(self, patch, data):
     PatchEntry.__init__(self, patch, data['path'])
+    self.pattern = data['pattern'] if 'pattern' in data else False
   def execute(self):
-    self.patch.remove_file(self)
+    self.patch.remove_entry(self)
 
 entry_handlers = {
   'extract': BundledFile,
@@ -156,7 +130,7 @@ class Patch:
     self.summary.deletions.append(*params)
   def extract_file(self, filespec):
     path = filespec.path
-    other_info = get_file_info(path) if os.path.exists(path) else {}
+    other_info = filelib.get_file_info(path) if os.path.exists(path) else {}
     if (not other_info):
       self.write_file(filespec)
       self.add_addition(path, filespec.version, filespec.integrity_passed)
@@ -171,11 +145,17 @@ class Patch:
   def write_file(self, filespec):
     with open(filespec.path, 'wb') as fp:
       fp.write(filespec.content)
-  def remove_file(self, filespec):
+  def remove_entry(self, filespec):
+    if (filespec.pattern):
+      for path in glob.iglob(filespec.path):
+        self.remove_file(path)
+    else:
+      self.remove_file(path)
+  def remove_file(self, path):
     try:
-      if (os.path.exists(filespec.path)):
-        os.remove(filespec.path)
-        self.add_deletion(filespec.path)
+      if (os.path.exists(path)):
+        os.remove(path)
+        self.add_deletion(path)
     except:
       pass
   def execute(self):
@@ -184,12 +164,11 @@ class Patch:
 
 if (__name__ == '__main__'):
   def abort():
-    raw_input('Invalid patch format.\nPress enter to exit.')
+    uxcore.display_error(['invalid patch format'])
     exit(0)
   
   try:
-    with (open(sys.argv[1])) as fp:
-      data = json.load(fp)
+    data = nicejson.load(sys.argv[1])
   except (ValueError, IndexError):
     abort()
   if ('magic' not in data or data['magic'] != 'aunt-tabitha:update'):
@@ -200,4 +179,4 @@ if (__name__ == '__main__'):
 
   print(patch.summary.render())
 
-  raw_input('\n{}\nall done! press enter to exit'.format(patch.summary.render_short()))
+  uxcore.display_success([patch.summary.render_short()])
