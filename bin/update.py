@@ -2,7 +2,7 @@
 
 import re, os, glob, sys, zlib, base64, hashlib
 
-import filelib, uxcore, nicejson
+import maintlib, uxcore, nicejson
 
 class PatchEntry:
   def __init__(self, patch, path):
@@ -23,7 +23,7 @@ class BundledFile(PatchEntry):
     self.detect_version()
   def detect_version(self):
     first_line = self.content.partition('\n')[0]
-    meta = filelib.get_meta(first_line)
+    meta = maintlib.get_meta(first_line)
     if meta and ('version') in meta:
       self.version = meta['version']
   def execute(self):
@@ -130,7 +130,7 @@ class Patch:
     self.summary.deletions.append(*params)
   def extract_file(self, filespec):
     path = filespec.path
-    other_info = filelib.get_file_info(path) if os.path.exists(path) else {}
+    other_info = maintlib.get_file_info(path) if os.path.exists(path) else {}
     if (not other_info):
       self.write_file(filespec)
       self.add_addition(path, filespec.version, filespec.integrity_passed)

@@ -8,7 +8,7 @@ import random
 from collections import OrderedDict
 import os.path, glob, re
 
-import filelib
+import maintlib
 
 try:
   user_input = raw_input
@@ -75,58 +75,21 @@ nouns = [
 def nouns_signature(seed, n=3):
   return '_'.join(random.choice(nouns) for _ in range(n))
 
-def timestamp():
-  dt = datetime.datetime.now()
-  dt = dt.replace(microsecond = 0)
-  return dt.isoformat()
-
-def bundle_file(path):
-  data = {'path': path}
-  try:
-    with open(path, 'rb') as fp:
-      content = fp.read()
-    data['content'] = base64.b64encode(zlib.compress(content))
-    data['integrity'] = hashlib.sha256(content).hexdigest()
-  except:
-    data['exception'] = traceback.format_exc()
-  return data
-
-def get_bin_dir(arg0):
-  return os.path.split(arg0)[0]
-
-def collect_bin_info(bin_dir):
-  return filelib.collect_file_info(bin_dir, '*.py', bin_dir)
-
-def produce_log(source=None, exception=True, files=None, first_arg=None):
-  data = OrderedDict({'time': timestamp()})
-  if (source):
-    data['source'] = source
-  if (exception):
-    data['exception'] = traceback.format_exc()
-  context = Context()
-  data['context'] = context.data
-  if (first_arg):
-    bin_dir = get_bin_dir(first_arg)
-    data['bin_meta'] = collect_bin_info(bin_dir)
-  if (files):
-    data['files'] = []
-    for path in files:
-      data['files'].append(bundle_file(path))
-  return data
-
 def fix_timestamp(ts, compact=False):
   if (compact):
     return ts.replace(':','').replace('T','').replace('-','')
   return ts.replace(':','-')
 
-def write_log(source=None, exception=True, files=None, log_prefix='log', first_arg=None):
-  data = produce_log(source, exception, files, first_arg)
+def write_log(source=None, exception=True, files=None, log_prefix='log', bin_info=True):
+  data = maintlib.produce_log(source, files, exception, bin_info)
+  context = Context()
+  data['context'] = context.data
   ts = fix_timestamp(data['time'], compact=True)
   signature = nouns_signature(fix_timestamp(data['time'], compact=True))
   path = '{prefix}_{timestamp}_{signature}.json'.format(
     **{'prefix':log_prefix,'timestamp':ts,'signature':signature})
   with open(path, 'w') as fp:
-    json.dump(data, fp)
+    json.dump(data, fp, indent=2)
   return path
 
 

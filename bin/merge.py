@@ -1,4 +1,4 @@
-# {"version": "1"}
+# {"version": "2"}
 
 from sys import argv
 from clocky import time_24
@@ -36,5 +36,5 @@ try:
   nicejson.dump(data, output_path)
   uxcore.display_success_standard(output_path)
 except:
-  log_path = uxcore.write_log('merge', files=files, first_arg=argv[0])
+  log_path = uxcore.write_log('merge', files=files)
   uxcore.display_error_standard(log_path)

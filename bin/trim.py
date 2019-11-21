@@ -1,4 +1,4 @@
-# {"version": "1"}
+# {"version": "2"}
 
 from sys import argv
 from json import dump
@@ -64,5 +64,5 @@ try:
   output_path = os.path.split(argv[1])[-1]
   uxcore.display_success_standard(output_path)
 except:
-  log_path = uxcore.write_log('trim', files=[argv[1]], first_arg=argv[0])
+  log_path = uxcore.write_log('trim', files=[argv[1]])
   uxcore.display_error_standard(log_path)
