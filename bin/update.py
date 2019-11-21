@@ -122,17 +122,32 @@ class Summary:
     sections = [self.additions, self.changes, self.deletions]
     return '\n\n'.join(section.render() for section in sections if len(section) > 0)
   def render_short(self):
-    return self.format_string.format(len(self.additions), len(self.changes), len(self.deletions))
+    if (len(self.additions) + len(self.changes) + len(self.deletions) > 0):
+      return self.format_string.format(len(self.additions), len(self.changes), len(self.deletions))
+    return None
 
 class FileCollection:
+  format_string = 'collected {num} files to {out}'
   def __init__(self):
     self.signatures = set()
     self.paths = []
+    self.output_path = None
   def add(self, path):
     relpath = os.path.relpath(path)
     if (relpath not in self.signatures):
       self.signatures.add(relpath)
       self.paths.append(path)
+  def set_output(self, path):
+    self.output_path = path
+  def __len__(self):
+    return len(self.paths)
+  def execute(self):
+    log_data = maintlib.produce_log('update:collect', self.paths, exception=False)
+    nicejson.dump(log_data, self.output_path)
+  def render_short(self):
+    if (len(self.paths) > 0):
+      return self.format_string.format(num= len(self.paths), out = self.output_path)
+    return None
 
 class Patch:
   def __init__(self, data):
@@ -189,9 +204,12 @@ class Patch:
   def execute(self):
     for item in self.entries:
       item.execute()
-    log_data = maintlib.produce_log('update:collect', self.collection.paths, exception=False)
-    outfile = self.properties['remote_output'] if 'remote_output' in self.properties else 'update_collect.json'
-    nicejson.dump(log_data, outfile)
+    if (len(self.collection) > 0):
+      outfile = 'update_collect.json'
+      if ('remote_output' in self.properties):
+        outfile = self.properties['remote_output']
+      self.collection.set_output(outfile)
+      self.collection.execute()
 
 if (__name__ == '__main__'):
   def abort():
@@ -210,4 +228,13 @@ if (__name__ == '__main__'):
 
   print(patch.summary.render())
 
-  uxcore.display_success([patch.summary.render_short()])
+  message = []
+  summary = patch.summary.render_short()
+  if (summary):
+    message.append(summary)
+  collection = patch.collection.render_short()
+  if (collection):
+    message.append(collection)
+  if (not message):
+    message = ['all up to date with patch']
+  uxcore.display_success(message)
