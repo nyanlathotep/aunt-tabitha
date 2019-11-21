@@ -44,7 +44,7 @@ class BundledFile(Bundle):
       content_hash = hashlib.sha256(self.content).hexdigest()
       self.integrity_passed = content_hash == self.integrity
     if (compressed):
-      self.content = str(self.content)
+      self.content = self.content.decode('utf-8')
   def render_summary(self):
     output = file_summary_template.format(name=self.short_path, size=len(self.content))
     if (self.integrity):
@@ -88,8 +88,9 @@ class UXCoreLog:
       'exception': self.exception or 'no exception!?'})
     output += '\nbundled files:\n==============\n'
     output += '\n'.join([x.render_summary() for x in self.files])
-    output += '\n\ncode versions:\n==============\n'
-    output += '\n'.join(['{}: {}'.format(k, self.bin_meta[k]['meta']['version']) for k in self.bin_meta])
+    if (self.bin_meta):
+      output += '\n\ncode versions:\n==============\n'
+      output += '\n'.join(['{}: {}'.format(k, self.bin_meta[k]['meta']['version']) for k in self.bin_meta])
     return output
   def render_yaml(self, obj):
     buffer = io.StringIO()

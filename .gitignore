@@ -1,6 +1,7 @@
 # python
 *.py[cdo]
 /py27
+__pycache__
 
 # data
 *.json
