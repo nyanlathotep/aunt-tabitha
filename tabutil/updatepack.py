@@ -42,7 +42,7 @@ if (__name__ == '__main__'):
       bundle = {'action': 'remove', 'path': path, 'pattern': False}
       archive['entries'].append(bundle)
   if (args.del_globs):
-    for path in args.del_glob:
+    for path in args.del_globs:
       bundle = {'action': 'remove', 'path': path, 'pattern': True}
       archive['entries'].append(bundle)
   if (args.get_files):
