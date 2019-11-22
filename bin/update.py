@@ -1,6 +1,6 @@
 # {"version": "2"}
 
-import re, os, glob, sys, zlib, base64, hashlib
+import re, os, glob, sys, zlib, base64, hashlib, errno
 
 import maintlib, uxcore, nicejson
 
@@ -178,6 +178,12 @@ class Patch:
         old_version = other_info['meta']['version']
       self.add_change(path, old_version, filespec.version, filespec.integrity_passed)
   def write_file(self, filespec):
+    root = os.path.split(filespec.path)[0]
+    try:
+      os.makedirs(root)
+    except OSError as e:
+      if (e.errno != errno.EEXIST):
+        raise
     with open(filespec.path, 'wb') as fp:
       fp.write(filespec.content)
   def remove_entry(self, filespec):
